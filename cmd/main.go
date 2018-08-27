@@ -63,6 +63,19 @@ func parseFlags() {
 		"rev": gitPractice.Revision,
 		"env": gitPractice.Environment,
 	})
+	switch gitPractice.Environment {
+	case "master":
+		logrus.SetLevel(logrus.WarnLevel)
+		loggerV2.Warn("Set warn level")
+	case "develop":
+		// logrus.SetLevel(logrus.DebugLevel)
+		// loggerV2.Warn("Set debug level")
+
+	default:
+		logrus.SetLevel(logrus.InfoLevel)
+		loggerV2.Warn("Set info level")
+
+	}
 }
 
 func doSomeWork() {
