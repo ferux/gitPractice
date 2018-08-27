@@ -5,4 +5,4 @@ benchs.test
 /**/*.prof
 run
 /**/*.exe
-/.vscode/
+.vscode/
