@@ -11,14 +11,47 @@
   version = "v3.3.2"
 
 [[projects]]
+  name = "github.com/go-kit/kit"
+  packages = [
+    "log",
+    "log/levels"
+  ]
+  revision = "f66b0e13579bfc5a48b9e2a94b1209c107ea1f41"
+  version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/go-logfmt/logfmt"
+  packages = ["."]
+  revision = "390ab7935ee28ec6b286364bba9b4dd6410cb3d5"
+  version = "v0.3.0"
+
+[[projects]]
+  name = "github.com/go-stack/stack"
+  packages = ["."]
+  revision = "259ab82a6cad3992b4e21ff5cac294ccb06474bc"
+  version = "v1.7.0"
+
+[[projects]]
+  branch = "master"
+  name = "github.com/kr/logfmt"
+  packages = ["."]
+  revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
+
+[[projects]]
   name = "github.com/pkg/errors"
   packages = ["."]
   revision = "645ef00459ed84a119197bfb8d8205042c6df63d"
   version = "v0.8.0"
 
+[[projects]]
+  branch = "master"
+  name = "github.com/streadway/amqp"
+  packages = ["."]
+  revision = "70e15c650864f4fc47f5d3c82ea117285480895d"
+
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "6f86d065d51e282cc3046934969111d813f9f51856a1330115813d48d6a22a21"
+  inputs-digest = "00875a53d4e746574c61516881c25aa1cffca1289a2da0e0bb07aaa3c2e985a4"
   solver-name = "gps-cdcl"
   solver-version = 1
