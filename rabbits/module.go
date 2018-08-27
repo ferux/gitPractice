@@ -6,9 +6,11 @@ import (
 	"math/rand"
 	"os"
 	"time"
-	
-	"github.com/sirupsen/logrus"
+
+	"github.com/ferux/gitPractice"
+
 	"github.com/go-kit/kit/log"
+	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
 )
 
@@ -50,6 +52,9 @@ func Prepare(connString string) (Rabbit, error) {
 	lg := log.NewLogfmtLogger(os.Stdout)
 	logger = log.NewContext(lg).WithPrefix("pkg", "rabbits")
 	lr := logrus.New().WithField("pkg", "rabbits")
+	if gitPractice.Environment != "develop" {
+		logrus.SetLevel(logrus.WarnLevel)
+	}
 	return Rabbit{connString, 0, true, nil, nil, nil, nil, amqp.Queue{}, nil, lr}, nil
 }
 
@@ -156,7 +161,7 @@ func (r *Rabbit) prepareWorker() (err error) {
 		if err != nil {
 			l.WithError(err).Error("got error")
 		}
-	} ()
+	}()
 
 	l.Info("initClose")
 	if err = r.initClose(); err != nil {
