@@ -9,6 +9,8 @@ import (
 	"runtime"
 	"time"
 
+	"github.com/sirupsen/logrus"
+
 	"github.com/ferux/gitPractice"
 	"github.com/ferux/gitPractice/abtest"
 	"github.com/ferux/gitPractice/hidstruct"
@@ -32,6 +34,7 @@ var (
 // Logger is the app-wide logger.
 var Logger *levels.Levels
 var kitlogger kitlog.Logger
+var loggerV2 *logrus.Entry
 
 func parseFlags() {
 	flag.Parse()
@@ -51,9 +54,15 @@ func parseFlags() {
 
 	kitlogger = kitlog.NewLogfmtLogger(os.Stdout)
 	loggerContext := kitlog.NewContext(kitlogger)
-
 	log := levels.New(loggerContext)
 	Logger = &log
+
+	loggerV2 = logrus.New().WithFields(logrus.Fields{
+		"pkg": "main",
+		"ver": gitPractice.Version,
+		"rev": gitPractice.Revision,
+		"env": gitPractice.Environment,
+	})
 }
 
 func doSomeWork() {
@@ -163,15 +172,12 @@ func doSomeLogs() {
 }
 
 func main() {
-	log.SetFlags(0)
-	log.SetPrefix(gitPractice.Version + " ")
-	log.Print("Application gitPractice started.")
+	parseFlags()
+	loggerV2.Info("GITPRACTICE START")
 	defer func() {
-		log.Print("Application gitPractice finished.")
+		loggerV2.Info("GITPRACTICE STOP")
 		os.Exit(0) // if you call runtime.Goexit it finishes current goroutine but not the other ones.
 	}()
-	parseFlags()
-
 	// doSomeLogs()
 	doSomeMagicRabbits()
 	// if *cpuprofile != "" {
