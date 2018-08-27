@@ -35,6 +35,7 @@ var (
 var Logger *levels.Levels
 var kitlogger kitlog.Logger
 var loggerV2 *logrus.Entry
+var ll logrus.Level
 
 func parseFlags() {
 	flag.Parse()
@@ -65,17 +66,17 @@ func parseFlags() {
 	})
 	switch gitPractice.Environment {
 	case "master":
-		logrus.SetLevel(logrus.WarnLevel)
-		loggerV2.Warn("Set warn level")
+		ll = logrus.WarnLevel
 	case "develop":
-		// logrus.SetLevel(logrus.DebugLevel)
-		// loggerV2.Warn("Set debug level")
-
+		ll = logrus.DebugLevel
 	default:
-		logrus.SetLevel(logrus.InfoLevel)
-		loggerV2.Warn("Set info level")
-
+		ll = logrus.InfoLevel
 	}
+	logrus.SetLevel(ll)
+	loggerV2.Level = ll
+	loggerV2.WithField("level", ll.String()).Warn("New log level applied")
+	loggerV2.WithField("level", ll.String()).Info("New log level applied")
+	loggerV2.WithField("level", ll.String()).Debug("New log level applied")
 }
 
 func doSomeWork() {
@@ -149,7 +150,7 @@ func doAirbrake() {
 }
 
 func doRabbits() {
-	r, err := rabbits.Prepare("amqp://localhost:5672")
+	r, err := rabbits.Prepare("amqp://localhost:5672", ll)
 	if err != nil {
 		fmt.Printf("can't prepare rabbit: %v\n", err)
 		return
@@ -160,7 +161,7 @@ func doRabbits() {
 }
 
 func doSomeMagicRabbits() {
-	r, err := rabbits.Prepare("amqp://localhost:5672")
+	r, err := rabbits.Prepare("amqp://localhost:5672", ll)
 	if err != nil {
 		panic(err)
 	}

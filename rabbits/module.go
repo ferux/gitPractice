@@ -7,8 +7,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/ferux/gitPractice"
-
 	"github.com/go-kit/kit/log"
 	"github.com/sirupsen/logrus"
 	"github.com/streadway/amqp"
@@ -43,19 +41,20 @@ type Rabbit struct {
 }
 
 // Prepare checks if connection available for rabbit.
-func Prepare(connString string) (Rabbit, error) {
+func Prepare(connString string, ll logrus.Level) (*Rabbit, error) {
 	conn, err := amqp.Dial(connString)
 	if err != nil {
-		return Rabbit{}, err
+		return nil, err
 	}
 	_ = conn.Close()
 	lg := log.NewLogfmtLogger(os.Stdout)
 	logger = log.NewContext(lg).WithPrefix("pkg", "rabbits")
 	lr := logrus.New().WithField("pkg", "rabbits")
-	if gitPractice.Environment != "develop" {
-		logrus.SetLevel(logrus.WarnLevel)
-	}
-	return Rabbit{connString, 0, true, nil, nil, nil, nil, amqp.Queue{}, nil, lr}, nil
+
+	logrus.SetLevel(ll)
+	lr.Level = ll
+
+	return &Rabbit{connString, 0, true, nil, nil, nil, nil, amqp.Queue{}, nil, lr}, nil
 }
 
 // ClosingWorker tests how rabbit worker works with closing
