@@ -6,3 +6,4 @@ benchs.test
 run
 /**/*.exe
 .vscode/
+assets/

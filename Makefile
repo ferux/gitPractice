@@ -1,5 +1,5 @@
 GO:=go
-CMD=gp
+CMD=gitPractice
 OUTPUT=./bin/$(CMD)
 CURPKG := $(shell go list ./... | grep -v /vendor -m1)
 PKGS := $(shell go list ./... | grep -v /vendor)

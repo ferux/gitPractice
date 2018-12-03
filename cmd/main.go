@@ -1,13 +1,20 @@
 package main
 
 import (
+	"bytes"
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
+	"io/ioutil"
 	"log"
+	"net/http"
+	"net/url"
 	"os"
 	"runtime"
 	"time"
+
+	"github.com/ferux/gitPractice/models"
 
 	"github.com/sirupsen/logrus"
 
@@ -60,9 +67,6 @@ func parseFlags() {
 
 	loggerV2 = logrus.New().WithFields(logrus.Fields{
 		"pkg": "main",
-		"ver": gitPractice.Version,
-		"rev": gitPractice.Revision,
-		"env": gitPractice.Environment,
 	})
 	switch gitPractice.Environment {
 	case "master":
@@ -77,6 +81,11 @@ func parseFlags() {
 	loggerV2.WithField("level", ll.String()).Warn("New log level applied")
 	loggerV2.WithField("level", ll.String()).Info("New log level applied")
 	loggerV2.WithField("level", ll.String()).Debug("New log level applied")
+	loggerV2.WithFields(logrus.Fields{
+		"ver": gitPractice.Version,
+		"rev": gitPractice.Revision,
+		"env": gitPractice.Environment,
+	})
 }
 
 func doSomeWork() {
@@ -185,6 +194,80 @@ func doSomeLogs() {
 	}
 }
 
+// SMSMagicURL for sms gate
+const SMSMagicURL = "https://5zdlj.api.infobip.com/sms/2/text/single"
+
+func doSomeSMSMagic() {
+	var (
+		gURL     = SMSMagicURL
+		phone    = "+79035941825"
+		text     = "Wake up, Neo!"
+		login    = "VideoControl"
+		password = "Nt4Z%bE2&"
+		headers  = http.Header{}
+	)
+	l := loggerV2.WithField("fn", "DoSomeMagic")
+	l.Info("begin testing")
+
+	gateURL, _ := url.Parse(gURL)
+	l.WithField("url", gateURL).Info("parsed url")
+	authBase64 := base64.StdEncoding.EncodeToString([]byte(login + ":" + password))
+	headers.Add("Host", gateURL.Hostname())
+	headers.Add("Authorization", "Basic "+authBase64)
+	headers.Add("Content-Type", "application/json")
+	headers.Add("Accept", "application/json")
+
+	data, _ := json.Marshal(map[string]string{
+		"from": "Rostelecom",
+		"to":   phone,
+		"text": text,
+	})
+	l.WithFields(logrus.Fields{
+		"method":  "post",
+		"url":     gURL,
+		"type":    "json",
+		"headers": headers,
+		"body":    string(data),
+	}).Info("performing request")
+
+	req, _ := http.NewRequest(http.MethodPost, gURL, bytes.NewReader(data))
+	l.WithField("request", req).Info("bump")
+	req.Header = headers
+	cl := http.DefaultClient
+	resp, err := cl.Do(req)
+	if err != nil {
+		l.WithError(err).Error("msg", "can't perform request to server")
+		return
+	}
+
+	respText, err := ioutil.ReadAll(resp.Body)
+
+	l.WithFields(logrus.Fields{
+		"code":   resp.StatusCode,
+		"status": resp.Status,
+		"body":   string(respText),
+	}).WithError(err).Info("response")
+
+}
+
+func doSomeParsing() {
+	rc, err := models.ParseJSON("./assets/channels.json")
+	if err != nil {
+		loggerV2.WithError(err).Error("can't parse json file")
+		return
+	}
+	seen, unseen, err := rc.Validate()
+	if err != nil {
+		loggerV2.WithError(err).Error("json is not valid")
+		return
+	}
+
+	loggerV2.WithField("seen", seen).WithField("unseen", unseen).Info()
+	err = rc.DeleteEnabled("./assets/disabled.json")
+	loggerV2.WithError(err).Info("deleteEnabled()")
+	loggerV2.Info("oh well")
+}
+
 func main() {
 	parseFlags()
 	loggerV2.Info("GITPRACTICE START")
@@ -192,8 +275,10 @@ func main() {
 		loggerV2.Info("GITPRACTICE STOP")
 		os.Exit(0) // if you call runtime.Goexit it finishes current goroutine but not the other ones.
 	}()
+	doSomeParsing()
+	// doSomeSMSMagic()
 	// doSomeLogs()
-	doSomeMagicRabbits()
+	// doSomeMagicRabbits()
 	// if *cpuprofile != "" {
 	// 	f, err := os.Create(*cpuprofile)
 	// 	if err != nil {
